@@ -1,0 +1,11 @@
+﻿Teste,Estratégia,Variável Isolada,Qtd Chunks,Tam. Médio
+1,"Fixo, 200, sem overlap",tamanho (extremo baixo),181,198.7
+2,"Fixo, 500, sem overlap",tamanho,73,493.1
+3,"Fixo, 1000, sem overlap",tamanho,37,973.2
+4,"Fixo, 2000, sem overlap",tamanho (extremo alto),19,1895.6
+5,"Fixo, 500, overlap 50 (10%)",overlap leve,80,499.3
+6,"Fixo, 500, overlap 200 (40%)",overlap pesado,120,498.1
+7,Por parágrafo,estrutura natural,88,407.4
+8,"Por sentença, agrupando 3",estrutura natural,63,569.5
+9,Recursivo (separadores hierárquicos),estratégia composta,107,350.9
+10,Por seção / heading do Markdown,estrutura semântica,15,2348.2
