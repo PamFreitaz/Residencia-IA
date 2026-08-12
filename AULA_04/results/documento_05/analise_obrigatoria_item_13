@@ -1,0 +1,56 @@
+# Análise Comparativa dos 10 Experimentos de Chunking (Documento 05)
+
+### 1. Qual estratégia gerou mais chunks?
+O **Teste 1** (Corte Fixo em 200 caracteres), gerando **352 chunks**.
+Como o artigo do BERT é extenso (70.235 caracteres), a janela rígida e reduzida de 200 caracteres fragmentou o texto em uma quantidade massiva de pequenos pedaços, dividindo frases, nomes de autores e siglas ao meio.
+
+### 2. Qual gerou menos chunks?
+O **Teste 10** (Markdown Header Splitter), com **30 chunks**, e o **Teste 4** (Corte Fixo de 2000 caracteres), com **36 chunks**.
+O Teste 10 agrupou seções inteiras do artigo sob os títulos principais (como `## 3 BERT`, `## 4.1 GLUE`, `## 5 Ablation Studies` e seções do apêndice). O Teste 4 utilizou um tamanho de bloco muito extenso para acumular caracteres antes do corte.
+
+### 3. Como o tamanho dos chunks variou?
+Nos **Testes 1 a 6**, a variação seguiu parâmetros estritos em caracteres (200, 500, 1000, 2000) e limites fixos de overlap (50 e 200). Nos **Testes 7 a 10**, o tamanho variou de forma flexível e orgânica, acompanhando a estrutura real do artigo científico (parágrafos, agrupamento de 3 sentenças e seções de marcação Markdown).
+
+### 4. Qual estratégia preservou melhor a estrutura dos documentos?
+O **Teste 10** (Markdown Splitter) e o **Teste 9** (Recursive Splitter).
+O Teste 10 preservou a estrutura formal do artigo adicionando nos metadados a qual seção do artigo cada trecho pertencia (ex: identificando se o texto tratava de `3.1 Pre-training BERT` ou `A.1 Illustration of the Pre-training Tasks`). O Teste 9 garantiu que a explicação de conceitos não fosse quebrada no meio de orações.
+
+### 5. Como tabelas foram tratadas?
+O artigo possui diversas tabelas comparativas com métricas de NLP (Tabelas 1 a 8):
+* Nos **Testes por Caracteres Fixos (1, 2 e 5)**, as linhas das tabelas em Markdown contendo resultados do GLUE, SQuAD e ablation estudos foram rasgadas no meio das colunas e valores numéricos, corrompendo a estrutura de dados.
+* Nos **Testes Estruturados (7, 9 e 10)**, as tabelas foram mantidas em blocos integrados, preservando os alinhamentos e permitindo a recuperação precisa de métricas e baselines.
+
+### 6. Como imagens foram tratadas?
+As figuras do artigo (como o diagrama de pré-treino/fine-tuning da Figura 1, a representação de embeddings da Figura 2 e a comparação de arquiteturas entre BERT, GPT e ELMo da Figura 3) foram descartadas na conversão do PDF para Markdown e substituídas pela tag indicativa `<!-- image -->`.
+
+### 7. Quais informações foram perdidas durante a conversão PDF → Markdown?
+Perdeu-se o layout de duas colunas típico dos artigos do arXiv, a estilização visual dos diagramas de arquitetura das redes neurais, elementos gráficos de gráficos de convergência (como a Figura 5) e a formatação das notas de rodapé. Todo o conteúdo em texto puro, dados de tabelas e equações matemáticas foram mantidos.
+
+### 8. O chunking por caracteres fragmentou conceitos ou estruturas importantes?
+Sim, de forma severa nos **Testes 1 e 2**.
+Foram fatiados ao meio termos centrais do trabalho como `BERT_BASE`, `BERT_LARGE`, `Masked LM`, `Next Sentence Prediction`, tokens especiais como `[CLS]` e `[SEP]`, além de siglas de datasets de benchmark (ex: `SQuAD`, `MNLI`, `CoNLL-2003`), prejudicando a indexação vetorial.
+
+### 9. O chunking por parágrafo produziu chunks muito grandes?
+Sim. No **Teste 7** (196 chunks), a extensão longa de parágrafos na seção de trabalhos correlatos, detalhamento de hiperparâmetros e tabelas resultou em blocos isolados que chegaram a atingir 3.400 e até 9.300 caracteres (especialmente nas referências bibliográficas do apêndice).
+
+### 10. O chunking por sentença conseguiu preservar melhor o contexto?
+Sim. No **Teste 8** (204 chunks), ao agrupar as frases de 3 em 3, evitou-se o corte arbitrário de explicações técnicas. Contudo, a regra rígida de 3 frases pode unir a frase final do detalhamento de `Task #1: Masked LM` com a primeira frase de `Task #2: Next Sentence Prediction`, ignorando a troca de tópico.
+
+### 11. O Recursive Splitter apresentou vantagens?
+Sim, destacou-se como uma das estratégias mais eficientes.
+Ele tentou quebrar primeiro por parágrafos (`\n\n`), depois por quebras de linha (`\n`) e palavras, mantendo os blocos em torno de ~500 caracteres com 50 de overlap. Isso permitiu manter a coesão do texto técnico sem estourar o limite de tokens do modelo de embedding.
+
+### 12. O Markdown Splitter conseguiu preservar a estrutura semântica?
+Sim. O splitter identificou todos os cabeçalhos (`#`, `##`) do documento e mapeou automaticamente os nomes dos capítulos, seções e apêndices do BERT dentro da propriedade `"metadata"` de cada registro JSON.
+
+### 13. Qual estratégia parece mais adequada para um sistema de RAG?
+O **Teste 9** (Recursive Splitter) e o **Teste 10** (Markdown Splitter).
+Ambos evitam a destruição de termos técnicos, preservam o contexto das tarefas de benchmark e mantêm a integridade da informação técnica exigida para respostas precisas.
+
+### 14. Quais estratégias devem ser descartadas?
+* **Teste 1 (Fixo 200):** Gera muitos chunks minúsculos e corta nomes de modelos e siglas ao meio.
+* **Teste 2 (Fixo 500 sem overlap):** Apresenta alto risco de cortar explicações acadêmicas e tabelas na borda do limite.
+* **Teste 4 (Fixo 2000):** Produz blocos gigantescos que estouram o limite de entrada do modelo de embeddings (gerando o alerta de limite de tokens `538 > 512` no terminal) e agrupam conceitos distintos em um único vetor.
+
+### 15. Quais estratégias você acha que devem ser utilizadas nos próximos experimentos?
+O **Recursive Character Splitter (Teste 9)** e o **Markdown Header Splitter (Teste 10)**, preferencialmente combinando ambas para que a estrutura do artigo seja mantida via metadados enquanto os blocos de texto são limitados em tamanho seguro.
