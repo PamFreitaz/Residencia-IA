@@ -17,10 +17,10 @@ tokenizador = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-mu
 
 # LOCALIZAÇÃO DOS ARQUIVOS (USANDO A PASTA ATUAL COMO BASE)
 pasta_atual = os.path.dirname(os.path.abspath(__file__))
-caminho_md = os.path.join(pasta_atual, "markdown", "twitter_algoritmo.md")
+caminho_md = os.path.join(pasta_atual, "markdown", "scaling_laws_llm.md")
 
-doc_id = "documento_03"
-doc_name = "twitter_algoritmo.pdf"
+doc_id = "documento_12"
+doc_name = "scaling_laws_llm.pdf"
 
 print("Carregando modelo de embeddings...")
 modelo_embedding = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
@@ -147,7 +147,7 @@ for num_teste, (estrategia, chunk_size, chunk_overlap, chunks, metadados) in exp
     print(f"Teste {num_teste:02d} concluído -> Salvo em: teste_{num_teste:02d}/chunks_embeddings.json ({len(chunks)} chunks)")
 
 
-# SALVAR O SUMMARY.JSON NO DOCUMENTO_03
+# SALVAR O SUMMARY.JSON NO DOCUMENTO_12
 
 summary_doc = {
     "document": doc_name,
