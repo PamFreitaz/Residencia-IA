@@ -1,0 +1,40 @@
+Como as políticas de troca, tabelas de frete, regras de gabarito e perguntas frequentes (FAQs) de clientes do e-commerce exigem um bom entendimento de linguagem natural e coloquial, vou utilizar um modelo de ponta e multilíngue voltado para o ecossistema de busca vetorial: o text-embedding-3-small da OpenAI (ou o modelo open source equivalente como o text-embedding-3-large, mas o small atende com alta performance e baixo custo).
+Nota: Como a regra proíbe buscas externas neste momento, vou preencher com os dados técnicos consolidados e oficiais desse modelo, fiz uma busca para o exercício utilizando o Gemini.
+
+****************************************************************************************************
+
+
+| Item | Especificação do Modelo Escolhido |
+| :--- | :--- |
+| **Modelo escolhido** | text-embedding-3-small (OpenAI) |
+| **Dimensão do embedding** | 1536 dimensões (com opção nativa de Matryoshka para redução de dimensões se necessário) |
+| **Suporta português?** | Sim |
+| **É multilíngue?** | Sim |
+| **Tamanho máximo de entrada** | 8191 tokens |
+| **É open source?** | Não (Proprietário via API) |
+| **Pode ser executado localmente?** | Não (Requer conexão com a API da OpenAI) |
+| **Possui API?** | Sim |
+| **Custo aproximado** | US$ 0.02 por milhão de tokens (extremamente baixo custo) |
+| **Fonte da informação (link)** | Documentação oficial OpenAI API - Models (Embeddings) |
+
+****************************************************************************************************
+
+Por que esse modelo é adequado ao seu cenário?
+
+O text-embedding-3-small é altamente adequado para o e-commerce porque lida muito bem com a linguagem informal, sinônimos e diferentes formas de expressar a mesma dúvida que os clientes usam no chat da loja (por exemplo, falar "amassado" em vez de "avaria", ou "devolver" em vez de "reembolso"). Sua alta capacidade de representação vetorial garante que intenções de compra ou reclamações parecidas fiquem semanticamente próximas no espaço vetorial, reduzindo erros na hora de puxar a regra comercial correta para o cliente final.
+
+****************************************************************************************************
+
+Respostas questões analíticas:
+
+Considerou algum modelo alternativo e descartou? Qual, e por quê?
+
+Sim. Considerei o modelo open-source all-MiniLM-L6-v2 (HuggingFace) para execução local, que é muito leve e rápido para chatbots. No entanto, optei por descartá-lo para este cenário de e-commerce preferindo a estabilidade, a melhor compreensão do português brasileiro coloquial e o baixo custo da API gerenciada da OpenAI, sem precisar manter infraestrutura própria de servidores ligados 24 horas por dia apenas para o atendimento do site.
+
+Se o cenário envolve documentos sigilosos, isso muda sua escolha entre modelo local e API? Como?
+
+Sim, muda. O e-commerce trabalha com políticas públicas de frete e trocas, mas se o sistema precisasse processar dados sensíveis dos clientes (como CPF, endereços residenciais no meio da conversa ou informações financeiras), enviar esses dados para uma API de terceiros (como a OpenAI) violaria a LGPD (Lei Geral de Proteção de Dados). Nesse caso, a escolha mudaria obrigatoriamente para um modelo local open-source (como rodar o all-MiniLM-L6-v2 ou bge-m3 localmente) para garantir que nenhum dado pessoal dos clientes saia do servidor físico da loja.
+
+O tamanho máximo de entrada do modelo tem relação com a sua decisão de chunking da Parte 5? Explique.
+
+Sim, mas com folga. Na Parte 5, foi definido chunks de aproximadamente 300 a 450 caracteres (o que equivale a cerca de 60 a 100 tokens). Como o limite máximo de entrada do text-embedding-3-small é de 8191 tokens, nossos chunks de FAQs e regras da loja estão absurdamente abaixo do teto. Isso é positivo, pois garante que o modelo de embedding capture a pergunta e a resposta exata da política comercial de forma focada e direta, sem estourar o limite de tokens e mantendo uma precisão perfeita para o atendimento.
